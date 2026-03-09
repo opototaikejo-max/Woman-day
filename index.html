@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
+  <title>Untuk Lala 💕</title>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Lato:wght@300;400&display=swap" rel="stylesheet"/>
+  <style>
+    *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+    html, body {
+      width:100%; height:100%; overflow:hidden;
+      font-family:'Lato', sans-serif;
+      background:#fff;
+    }
+
+    /* ════════════════════════════════
+       PAGE 1 — LANDING
+    ════════════════════════════════ */
+    #pg1 {
+      position:fixed; inset:0;
+      background:#383838;
+      display:flex; flex-direction:column;
+      align-items:center; justify-content:center;
+      z-index:500;
+      transition:opacity .7s ease, transform .7s ease;
+    }
+    #pg1.out { opacity:0; transform:scale(1.06); pointer-events:none; }
+
+    .sub {
+      color:#999; font-size:.8rem;
+      letter-spacing:4px; text-transform:uppercase;
+      margin-bottom:1.8rem;
+    }
+    #btnKlik {
+      background:#fff; color:#383838; border:none;
+      padding:16px 48px;
+      font-family:'Playfair Display',serif; font-size:1.1rem; font-weight:700;
+      border-radius:50px; cursor:pointer; letter-spacing:1px;
+      box-shadow:0 8px 28px rgba(0,0,0,.3);
+      transition:transform .2s, box-shadow .2s;
+    }
+    #btnKlik:active { transform:scale(.96); }
+    #btnKlik span { display:inline-block; animation:beat 1.8s ease-in-out infinite; }
+
+    /* ════════════════════════════════
+       PAGE 2 — LOVE BG
+    ════════════════════════════════ */
+    #pg2 {
+      position:fixed; inset:0; background:#fff;
+      opacity:0; pointer-events:none;
+      transition:opacity .8s ease .3s;
+    }
+    #pg2.in { opacity:1; pointer-events:all; }
+
+    #loveCanvas {
+      position:absolute; inset:0;
+      width:100%; height:100%;
+    }
+
+    /* ════════════════════════════════
+       AMPLOP — selalu center di layar
+    ════════════════════════════════ */
+    #envWrap {
+      position:absolute;
+      top:50%; left:50%;
+      transform:translate(-50%, -50%);
+      display:flex; flex-direction:column;
+      align-items:center; gap:20px;
+      z-index:10;
+      opacity:0; animation:upFade .9s ease .6s forwards;
+    }
+
+    #env {
+      position:relative;
+      /* lebar = 85% layar, max 320px */
+      width:min(320px, 85vw);
+      aspect-ratio:1.65/1;
+      cursor:pointer;
+    }
+
+    /* Badan amplop */
+    .eb {
+      position:absolute; inset:0;
+      background:linear-gradient(150deg, #ffd6e7, #ffb0c8);
+      border-radius:8px 8px 14px 14px;
+      box-shadow:0 10px 32px rgba(231,84,128,.28);
+      overflow:hidden;
+    }
+    /* lipatan V kiri bawah */
+    .eb::before {
+      content:''; position:absolute;
+      bottom:0; left:0;
+      width:0; height:0;
+      border-style:solid;
+      border-width:0 0 100% 50%;
+      border-color:transparent transparent rgba(210,60,110,.18) transparent;
+    }
+    /* lipatan V kanan bawah */
+    .eb::after {
+      content:''; position:absolute;
+      bottom:0; right:0;
+      width:0; height:0;
+      border-style:solid;
+      border-width:0 50% 100% 0;
+      border-color:transparent rgba(210,60,110,.18) transparent transparent;
+    }
+
+    /* FLAP — segitiga tutup atas */
+    .ef {
+      position:absolute;
+      top:0; left:0; right:0;
+      /* tinggi = 55% dari tinggi amplop */
+      height:55%;
+      transform-origin:top center;
+      transform-style:preserve-3d;
+      transition:transform .65s cubic-bezier(.4,0,.2,1);
+      z-index:4;
+      overflow:visible;
+    }
+    /* segitiga runcing ke BAWAH (tutup amplop yang benar) */
+    .ef::before {
+      content:''; position:absolute;
+      top:0; left:0;
+      width:100%; height:100%;
+      background:
+        /* gradient segitiga via clip-path */
+        linear-gradient(175deg, #fdd0e4, #ffb3c6);
+      clip-path:polygon(0 0, 100% 0, 50% 100%);
+    }
+    /* bayangan bagian dalam flap */
+    .ef::after {
+      content:''; position:absolute;
+      top:0; left:0;
+      width:100%; height:100%;
+      background:linear-gradient(175deg, #f090b5, #e878a0);
+      clip-path:polygon(0 0, 100% 0, 50% 100%);
+      opacity:.35;
+    }
+
+    .ef-icon {
+      position:absolute;
+      top:14%; left:50%;
+      transform:translateX(-50%);
+      font-size:clamp(1.2rem,5vw,1.6rem);
+      z-index:6; pointer-events:none;
+      transition:opacity .15s;
+    }
+
+    /* buka flap */
+    #env.open .ef { transform:rotateX(-180deg); }
+    #env.open .ef-icon { opacity:0; }
+
+    /* hint text */
+    .hint {
+      font-family:'Playfair Display',serif;
+      font-size:clamp(.85rem,3.5vw,1rem);
+      color:#e75480; letter-spacing:1px;
+    }
+
+    /* ════════════════════════════════
+       MODAL KERTAS — muncul di tengah layar
+    ════════════════════════════════ */
+    #letterModal {
+      position:fixed; inset:0;
+      display:flex; align-items:center; justify-content:center;
+      z-index:100;
+      pointer-events:none;
+      /* backdrop blur muncul saat show */
+      background:rgba(255,220,232,0);
+      transition:background .5s ease;
+    }
+    #letterModal.show {
+      pointer-events:all;
+      background:rgba(255,220,232,.45);
+    }
+
+    .letter-card {
+      background:#fff;
+      border-radius:16px;
+      padding:clamp(24px,6vw,36px) clamp(20px,5vw,32px);
+      width:min(85vw, 340px);
+      box-shadow:0 20px 60px rgba(231,84,128,.25);
+      text-align:center;
+      /* animasi masuk */
+      transform:translateY(40px) scale(.88);
+      opacity:0;
+      transition:
+        transform .65s cubic-bezier(.34,1.4,.64,1),
+        opacity .5s ease;
+    }
+    #letterModal.show .letter-card {
+      transform:translateY(0) scale(1);
+      opacity:1;
+    }
+
+    .letter-title {
+      font-family:'Playfair Display',serif;
+      font-size:clamp(.95rem,4vw,1.1rem);
+      font-weight:700; color:#e75480;
+      margin-bottom:clamp(12px,3vw,18px);
+    }
+    .letter-body {
+      font-family:'Playfair Display',serif;
+      font-size:clamp(.74rem,3.2vw,.85rem);
+      line-height:1.85; color:#555;
+    }
+    .letter-deco {
+      margin-top:16px; font-size:1.4rem;
+      letter-spacing:6px;
+    }
+
+    /* ════════════════════════════════
+       CONFETTI
+    ════════════════════════════════ */
+    .cf {
+      position:fixed; border-radius:2px;
+      opacity:0; pointer-events:none; z-index:400;
+      animation:cfFall linear forwards;
+    }
+    @keyframes cfFall {
+      0%   { opacity:1; transform:translateY(0) rotate(0deg) scale(1); }
+      100% { opacity:0; transform:translateY(380px) rotate(640deg) scale(.6); }
+    }
+
+    /* ════════════════════════════════
+       UTILS
+    ════════════════════════════════ */
+    @keyframes upFade {
+      from { opacity:0; transform:translate(-50%,-40%); }
+      to   { opacity:1; transform:translate(-50%,-50%); }
+    }
+    @keyframes beat {
+      0%,100% { transform:scale(1); }
+      50%      { transform:scale(1.2); }
+    }
+  </style>
+</head>
+<body>
+
+<!-- PAGE 1 -->
+<div id="pg1">
+  <p class="sub">ada sesuatu untukmu</p>
+  <button id="btnKlik" onclick="goLove()">KLIK AKU <span>♥</span></button>
+</div>
+
+<!-- PAGE 2 -->
+<div id="pg2">
+  <canvas id="loveCanvas"></canvas>
+
+  <!-- AMPLOP CENTER -->
+  <div id="envWrap">
+    <div id="env" onclick="openEnv()">
+      <div class="eb"></div>
+      <div class="ef">
+        <span class="ef-icon">💌</span>
+      </div>
+    </div>
+    <p class="hint">Klik amplopnya Lala~</p>
+  </div>
+</div>
+
+<!-- MODAL KERTAS -->
+<div id="letterModal">
+  <div class="letter-card">
+    <p class="letter-title">Untuk Lala 💕</p>
+    <p class="letter-body">Selamat Hari Perempuan Twin! Semoga kamu selalu jadi perempuan kuat, pintar, dan tetap jadi diri kamu yang keren. Terima kasih sudah jadi teman yang baik dan selalu bikin hari jadi lebih seru. Hari ini buat merayakan perempuan hebat — dan menurutku kamu salah satunya. 🌸</p>
+    <div class="letter-deco">♥ ♥ ♥</div>
+  </div>
+</div>
+
+<script>
+/* ── LOVE CANVAS ── */
+const cv = document.getElementById('loveCanvas');
+const cx = cv.getContext('2d');
+let W, H, hearts = [];
+
+function resize(){
+  W = cv.width  = window.innerWidth;
+  H = cv.height = window.innerHeight;
+}
+window.addEventListener('resize', resize);
+resize();
+
+function mkH(){
+  return {
+    x:Math.random()*W, y:Math.random()*H,
+    s:9+Math.random()*13,
+    sp:.35+Math.random()*.55,
+    op:.1+Math.random()*.2,
+    c:['#ffb3c6','#ff85a1','#ffc8dd','#ff6b9d','#ffacc7'][0|Math.random()*5]
+  };
+}
+function drawH(x,y,s,c,op){
+  cx.save(); cx.globalAlpha=op; cx.fillStyle=c;
+  cx.beginPath();
+  cx.moveTo(x,y);
+  cx.bezierCurveTo(x,y-s*.3, x-s*.5,y-s*.7, x-s*.5,y-s*.3);
+  cx.bezierCurveTo(x-s*.5,y-s*.8, x-s*.05,y-s*.9, x,y-s*.6);
+  cx.bezierCurveTo(x+s*.05,y-s*.9, x+s*.5,y-s*.8, x+s*.5,y-s*.3);
+  cx.bezierCurveTo(x+s*.5,y-s*.7, x,y-s*.3, x,y);
+  cx.closePath(); cx.fill(); cx.restore();
+}
+for(let i=0;i<80;i++) hearts.push(mkH());
+(function loop(){
+  cx.clearRect(0,0,W,H);
+  hearts.forEach(h=>{
+    h.x+=h.sp;
+    if(h.x-h.s>W){ h.x=-h.s; h.y=Math.random()*H; }
+    drawH(h.x,h.y,h.s,h.c,h.op);
+  });
+  requestAnimationFrame(loop);
+})();
+
+/* ── TRANSISI ── */
+function goLove(){
+  document.getElementById('pg1').classList.add('out');
+  document.getElementById('pg2').classList.add('in');
+}
+
+/* ── BUKA AMPLOP ── */
+let opened = false;
+function openEnv(){
+  if(opened) return;
+  opened = true;
+  // 1. buka flap
+  document.getElementById('env').classList.add('open');
+  // 2. setelah flap terbuka, tampilkan modal kertas
+  setTimeout(()=>{
+    document.getElementById('letterModal').classList.add('show');
+    confetti();
+  }, 500);
+}
+
+/* ── CONFETTI ── */
+function confetti(){
+  const cls=['#ff6b9d','#ffb3c6','#ff85a1','#ffd6e7','#ff4d8d','#fff','#ffd700','#ffacc7'];
+  for(let i=0;i<90;i++){
+    setTimeout(()=>{
+      const el=document.createElement('div');
+      el.className='cf';
+      el.style.left=(10+Math.random()*80)+'vw';
+      el.style.top=(5+Math.random()*55)+'vh';
+      el.style.background=cls[0|Math.random()*cls.length];
+      const sz=5+Math.random()*10;
+      el.style.width=sz+'px'; el.style.height=sz+'px';
+      el.style.borderRadius=Math.random()>.5?'50%':'3px';
+      el.style.animationDuration=(1+Math.random()*1.4)+'s';
+      document.body.appendChild(el);
+      setTimeout(()=>el.remove(),2800);
+    }, i*20);
+  }
+}
+</script>
+</body>
+</html>
